@@ -13,7 +13,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 
-	//"github.com/libp2p/go-libp2p-core/protocol"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/multiformats/go-multiaddr"
 )
@@ -31,7 +30,7 @@ func main() {
 	// 1: commandline config
 	config := Config{}
 
-	flag.StringVar(&config.Rendezvous, "rendezvous", "peerhive/stream", "")
+	flag.StringVar(&config.Rendezvous, "rendezvous", "peerhive", "")
 	flag.Int64Var(&config.Seed, "seed", 0, "Seed value for generating a PeerID, 0 is random")
 	flag.Var(&config.DiscoveryPeers, "peer", "Peer multiaddress for peer discovery")
 	flag.StringVar(&config.ProtocolID, "protocolid", "/pubsub", "")
@@ -47,13 +46,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	// view host details and addresses
-	fmt.Printf("host's ID %s / shortID:%s \n", h.ID().Pretty(), shortID(h.ID()))
-	fmt.Printf("Host's assigned addresses:\n")
+	fmt.Printf("Node shortID:%s \n", shortID(h.ID()))
+
+	fmt.Printf("Node assigned addresses:\n")
 	for i, addr := range h.Addrs() {
 		fmt.Printf("%v: %s/p2p/%s\n", i+1, addr.String(), h.ID())
 	}
+	fmt.Printf("Node PeerStore:%v", h.Peerstore().Peers())
 	fmt.Printf("\n")
 
 	//3: create DHT
@@ -165,10 +165,13 @@ type discoveryNotifee struct {
 // support PubSub.
 func (n *discoveryNotifee) HandlePeerFound(pi peer.AddrInfo) {
 	fmt.Printf("discovered new peer %s\n", pi.ID.Pretty())
-	err := n.h.Connect(context.Background(), pi)
-	if err != nil {
-		fmt.Printf("error connecting to peer %s: %s\n", pi.ID.Pretty(), err)
+	if n.h.ID() != pi.ID {
+		err := n.h.Connect(context.Background(), pi)
+		if err != nil {
+			fmt.Printf("error connecting to peer %s: %s\n", pi.ID.Pretty(), err)
+		}
 	}
+
 }
 
 // setupDiscovery creates an mDNS discovery service and attaches it to the libp2p Host.

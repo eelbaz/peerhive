@@ -23,7 +23,7 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		r = mrand.New(mrand.NewSource(seed))
 	}
 
-	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.Ed25519, 4096, r)
+	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.Secp256k1, 8192, r)
 	if err != nil {
 		return nil, err
 	}
