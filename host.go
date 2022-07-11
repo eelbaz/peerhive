@@ -38,7 +38,7 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		libp2p.EnableRelayService(),
 		libp2p.ListenAddrStrings("/ip4/172.105.135.138/tcp/46351/"),
 		libp2p.ListenAddrStrings("/ip4/172.105.135.138/udp/46351/quic/"),
-		libp2p.ListenAddrStrings("/ip4/127.0.0.1/udp/46351/quic/"),
+		libp2p.ListenAddrStrings("/ip4/127.0.0.1/udp/0/quic/"),
 	}
 
 	return libp2p.New(opts...)
