@@ -30,7 +30,7 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 	}
 
 	//add bootstrap
-	multiAddr, err := multiaddr.NewMultiaddr("/ip4/172.105.135.138/udp/41643/p2p/12D3KooWD7PXURAfkktsGKAVtwNnvgJKUzVksXCqJcsX7pKHxQKX")
+	multiAddr, err := multiaddr.NewMultiaddr("/ip4/172.105.135.138/udp/41643/quic/p2p/12D3KooWD7PXURAfkktsGKAVtwNnvgJKUzVksXCqJcsX7pKHxQKX")
 	if err != nil {
 		panic(err)
 	}
