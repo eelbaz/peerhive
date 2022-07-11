@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/libp2p/go-libp2p-discovery v0.6.0 
+	github.com/libp2p/go-libp2p-discovery v0.6.0
 	github.com/libp2p/zeroconf/v2 v2.1.1 // indirect
 	github.com/whyrusleeping/timecache v0.0.0-20160911033111-cfcb2f1abfee // indirect
 )

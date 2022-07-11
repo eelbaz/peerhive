@@ -36,5 +36,5 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		libp2p.EnableRelayService(),
 	}
 
-	return libp2p.New(opts...) //opts...)
+	return libp2p.New(opts...)
 }

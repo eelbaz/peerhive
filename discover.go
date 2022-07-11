@@ -30,17 +30,13 @@ func Discover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous str
 				log.Fatal(err)
 			}
 
-			/**if len(peers) > 0 {
-				fmt.Printf("peers found: %v \n", len(peers))
-			}**/
-
 			for _, p := range peers {
 				if p.ID == h.ID() {
 					continue
 				}
 				if h.Network().Connectedness(p.ID) != network.Connected {
 					_, err = h.Network().DialPeer(ctx, p.ID)
-					//fmt.Printf("Host ID: %s -> Connected to peer %s\n", h.ID().ShortString(), p.ID.Pretty())
+					//fmt.Printf("Host ID: %s -> Connected to peer %s\n", h.ID().ShortString(), p.ID.Pretty()) //
 					if err != nil {
 						continue
 					}
