@@ -11,14 +11,16 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
-func NewDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
+func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
 	var options []dht.Option
 
+	// if no bootstrap peers give this peer act as a bootstraping node
+	// other peers can use this peers ipfs address for peer discovery via dht
 	if len(bootstrapPeers) == 0 {
-		log.Println("No bootstrap peers provided, configuring DHT to be a server.")
 		options = append(options, dht.Mode(dht.ModeServer))
 	}
 
+	//
 	kdht, err := dht.New(ctx, host, options...)
 	if err != nil {
 		return nil, err

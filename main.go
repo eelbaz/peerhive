@@ -1,16 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
+
 	//"github.com/libp2p/go-libp2p-core/protocol"
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/multiformats/go-multiaddr"
@@ -25,6 +27,8 @@ type Config struct {
 }
 
 func main() {
+
+	// 1: commandline config
 	config := Config{}
 
 	flag.StringVar(&config.Rendezvous, "rendezvous", "peerhive/stream", "")
@@ -34,53 +38,95 @@ func main() {
 	flag.IntVar(&config.Port, "port", 0, "")
 	flag.Parse()
 
+	//Create context with Cancel
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
+	//2: Create new libp2p Host with host options from command line
 	h, err := NewHost(ctx, config.Seed, config.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("Host ID: %s", h.ID().Pretty())
-	log.Printf("Connect to me on:")
-	for _, addr := range h.Addrs() {
-		log.Printf("  %s/p2p/%s", addr, h.ID().Pretty())
+	// view host details and addresses
+	fmt.Printf("host's ID %s / shortID:%s \n", h.ID().Pretty(), shortID(h.ID()))
+	fmt.Printf("Host's assigned addresses:\n")
+	for i, addr := range h.Addrs() {
+		fmt.Printf("%v: %s/p2p/%s\n", i+1, addr.String(), h.ID())
 	}
+	fmt.Printf("\n")
 
-	dht, err := NewDHT(ctx, h, config.DiscoveryPeers)
+	//3: create DHT for discovery
+	dht, err := kDHT(ctx, h, config.DiscoveryPeers)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-
-	go Discover(ctx, h, dht, config.Rendezvous)
 
 	// create a new PubSub service using the GossipSub router
 	ps, err := pubsub.NewGossipSub(ctx, h)
 	if err != nil {
 		panic(err)
 	}
-	pl := ps.ListPeers(config.Rendezvous)
-	for _, peer := range pl {
-		log.Printf("Peer: %s", peer.Pretty())
-	}
 
-	run(h, cancel)
-}
+	go Discover(ctx, h, dht, config.Rendezvous)
 
-func run(h host.Host, cancel func()) {
-	c := make(chan os.Signal, 1)
-
-	signal.Notify(c, os.Interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
-	<-c
-
-	fmt.Printf("\rExiting...\n")
-
-	cancel()
-
-	if err := h.Close(); err != nil {
+	// setup local mDNS discovery
+	if err := setupDiscovery(h, config.Rendezvous); err != nil {
 		panic(err)
 	}
-	os.Exit(0)
+
+	// join the pubsub topic
+	topic, err := ps.Join(config.Rendezvous)
+	if err != nil {
+		panic(err)
+	}
+
+	// and subscribe to it
+	sub, err := topic.Subscribe()
+	if err != nil {
+		panic(err)
+	}
+
+	go publish(ctx, topic)
+	subscribe(sub, ctx, h.ID())
+
+}
+
+// start subsriber to topic
+func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer.ID) {
+	for {
+		msg, err := subscriber.Next(ctx)
+		if err != nil {
+			panic(err)
+		}
+
+		// only consider messages delivered by other peers
+		if msg.ReceivedFrom == hostID {
+			continue
+		}
+
+		fmt.Printf("%s -> %s\n", msg.ReceivedFrom.Pretty(), string(msg.Data))
+	}
+}
+
+// start publisher to topic
+func publish(ctx context.Context, topic *pubsub.Topic) {
+
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		for scanner.Scan() {
+
+			fmt.Printf("enter message to publish: \n")
+
+			msg := scanner.Text()
+			if len(msg) != 0 {
+				// publish message to topic
+				bytes := []byte(msg)
+				topic.Publish(ctx, bytes)
+			}
+		}
+	}
 }
 
 type addrList []multiaddr.Multiaddr
@@ -100,4 +146,34 @@ func (al *addrList) Set(value string) error {
 	}
 	*al = append(*al, addr)
 	return nil
+}
+
+// shortID returns the last 8 chars of a base58-encoded peer id.
+func shortID(p peer.ID) string {
+	pretty := p.Pretty()
+	return pretty[len(pretty)-8:]
+}
+
+// discoveryNotifee gets notified when we find a new peer via mDNS discovery
+type discoveryNotifee struct {
+	h host.Host
+}
+
+// HandlePeerFound connects to peers discovered via mDNS. Once they're connected,
+// the PubSub system will automatically start interacting with them if they also
+// support PubSub.
+func (n *discoveryNotifee) HandlePeerFound(pi peer.AddrInfo) {
+	fmt.Printf("discovered new peer %s\n", pi.ID.Pretty())
+	err := n.h.Connect(context.Background(), pi)
+	if err != nil {
+		fmt.Printf("error connecting to peer %s: %s\n", pi.ID.Pretty(), err)
+	}
+}
+
+// setupDiscovery creates an mDNS discovery service and attaches it to the libp2p Host.
+// This lets us automatically discover peers on the same LAN and connect to them.
+func setupDiscovery(h host.Host, ns string) error {
+	// setup mDNS discovery to find local peers
+	s := mdns.NewMdnsService(h, ns, &discoveryNotifee{h: h})
+	return s.Start()
 }
