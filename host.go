@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"io"
 	mrand "math/rand"
 
@@ -23,7 +24,7 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		r = mrand.New(mrand.NewSource(seed))
 	}
 
-	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.Secp256k1, 8192, r)
+	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.Ed25519, 2048, r)
 	if err != nil {
 		return nil, err
 	}
@@ -36,10 +37,8 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		libp2p.EnableAutoRelay(),
 		libp2p.EnableNATService(),
 		libp2p.EnableRelayService(),
-		libp2p.ListenAddrStrings("/ip4/172.105.135.138/tcp/46351/"),
-		libp2p.ListenAddrStrings("/ip4/172.105.135.138/udp/46351/quic/"),
-		libp2p.ListenAddrStrings("/ip4/127.0.0.1/udp/0/quic/"),
 	}
+	opts = append(opts, libp2p.ListenAddrStrings("/ip4/0.0.0.0/udp/"+fmt.Sprint(port)+"/quic"), libp2p.ListenAddrStrings("/ip6/::/udp/"+fmt.Sprint(port)+"/quic"))
 
 	return libp2p.New(opts...)
 }

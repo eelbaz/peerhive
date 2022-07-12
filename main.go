@@ -53,7 +53,6 @@ func main() {
 	for i, addr := range h.Addrs() {
 		fmt.Printf("%v: %s/p2p/%s\n", i+1, addr.String(), h.ID())
 	}
-	fmt.Printf("Node PeerStore:%v", h.Peerstore().Peers())
 	fmt.Printf("\n")
 
 	//3: create DHT
@@ -88,8 +87,8 @@ func main() {
 		panic(err)
 	}
 
-	go publish(ctx, topic)
-	subscribe(sub, ctx, h.ID())
+	go subscribe(sub, ctx, h.ID())
+	publish(ctx, topic)
 
 }
 
@@ -118,8 +117,7 @@ func publish(ctx context.Context, topic *pubsub.Topic) {
 	for {
 		for scanner.Scan() {
 
-			fmt.Printf("enter message to publish: \n")
-
+			fmt.Printf("(msg):\n")
 			msg := scanner.Text()
 			if len(msg) != 0 {
 				// publish message to topic

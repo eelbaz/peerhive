@@ -38,9 +38,9 @@ func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multia
 		go func() {
 			defer wg.Done()
 			if err := host.Connect(ctx, *peerinfo); err != nil {
-				log.Printf("Error while connecting to node %q: %-v", peerinfo, err)
+				log.Printf("Error connecting to node %q: %-v", peerinfo, err)
 			} else {
-				log.Printf("Connection established with bootstrap node: %q", *peerinfo)
+				log.Printf("Connected to bootstrap node: %q", *peerinfo)
 			}
 		}()
 	}
