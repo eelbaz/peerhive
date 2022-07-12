@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 
@@ -33,7 +34,7 @@ func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multia
 	var wg sync.WaitGroup
 	for _, peerAddr := range bootstrapPeers {
 		peerinfo, _ := peer.AddrInfoFromP2pAddr(peerAddr)
-
+		fmt.Printf("discovered new DHT peer %s\n", peerAddr)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
