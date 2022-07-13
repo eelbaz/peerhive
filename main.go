@@ -89,7 +89,7 @@ func main() {
 		panic(err)
 	}
 
-	go subscribe(sub, ctx, h.ID())
+	go subscribe(sub, ctx, h.ID(), config.BootstrapRelay)
 	if !config.BootstrapRelay {
 		go publish(ctx, topic)
 	}
@@ -98,7 +98,7 @@ func main() {
 }
 
 // start subsriber to topic
-func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer.ID) {
+func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer.ID, bootstrapRelay bool) {
 	for {
 		msg, err := subscriber.Next(ctx)
 		if err != nil {
@@ -109,8 +109,9 @@ func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer
 		if msg.ReceivedFrom == hostID {
 			continue
 		}
-
-		fmt.Printf("%s -> %s\n", msg.ReceivedFrom.Pretty(), string(msg.Data))
+		if !bootstrapRelay {
+			fmt.Printf("%s -> %s\n", msg.ReceivedFrom.Pretty(), string(msg.Data))
+		}
 	}
 }
 
