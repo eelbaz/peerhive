@@ -15,8 +15,8 @@ import (
 func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
 	var options []dht.Option
 
-	// if no bootstrap peers give this peer act as a bootstraping node
-	// other peers can use this peers ipfs address for peer discovery via dht.
+	// if no bootstrap node are available make this node act as a bootstraping node
+	// so other peers can may this node's ipfs address for peer discovery via dht.
 	if len(bootstrapPeers) == 0 {
 		options = append(options, dht.Mode(dht.ModeAuto))
 	}
