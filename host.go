@@ -38,7 +38,7 @@ func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
 		libp2p.EnableNATService(),
 		libp2p.EnableRelayService(),
 	}
-	opts = append(opts, libp2p.ListenAddrStrings("/ip4/0.0.0.0/udp/"+fmt.Sprint(port)+"/quic"), libp2p.ListenAddrStrings("/ip6/::/udp/"+fmt.Sprint(port)+"/quic"))
+	opts = append(opts, libp2p.ListenAddrStrings("/ip4/0.0.0.0/udp/"+fmt.Sprint(port)+"/quic"), libp2p.ListenAddrStrings("/ip6/::/udp/"+fmt.Sprint(port)+"/quic"), libp2p.ListenAddrStrings("/ip6/::/tcp/"+fmt.Sprint(port)+""), libp2p.ListenAddrStrings("/ip4/0.0.0.0/tcp/"+fmt.Sprint(port)+""))
 
 	return libp2p.New(opts...)
 }

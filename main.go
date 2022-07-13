@@ -23,6 +23,7 @@ type Config struct {
 	Rendezvous     string
 	Seed           int64
 	DiscoveryPeers addrList
+	BootstrapRelay bool
 }
 
 func main() {
@@ -30,11 +31,12 @@ func main() {
 	// 1: commandline config
 	config := Config{}
 
-	flag.StringVar(&config.Rendezvous, "rendezvous", "peerhive", "")
+	flag.StringVar(&config.Rendezvous, "rendezvous", "/peerhive", "")
 	flag.Int64Var(&config.Seed, "seed", 0, "Seed value for generating a PeerID, 0 is random")
 	flag.Var(&config.DiscoveryPeers, "peer", "Peer multiaddress for peer discovery")
 	flag.StringVar(&config.ProtocolID, "protocolid", "/pubsub", "")
 	flag.IntVar(&config.Port, "port", 0, "")
+	flag.BoolVar(&config.BootstrapRelay, "bootstraprelay", false, "bootstraprelay flag sets node to background relay and bootstrap mode only")
 	flag.Parse()
 
 	//Create context with Cancel
@@ -60,36 +62,40 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if !config.BootstrapRelay {
 
-	// create a new PubSub service using the GossipSub router
-	ps, err := pubsub.NewGossipSub(ctx, h)
-	if err != nil {
-		panic(err)
+		// create a new PubSub service using the GossipSub router
+		ps, err := pubsub.NewGossipSub(ctx, h)
+		if err != nil {
+			panic(err)
+		}
+
+		//Public DHT Discovery
+		go Discover(ctx, h, dht, config.Rendezvous)
+
+		// setup local mDNS discovery
+		if err := setupMDNSDiscovery(h, config.Rendezvous); err != nil {
+			panic(err)
+		}
+
+		// join the pubsub topic
+		topic, err := ps.Join(config.Rendezvous)
+		if err != nil {
+			panic(err)
+		}
+
+		// and subscribe to it
+		sub, err := topic.Subscribe()
+		if err != nil {
+			panic(err)
+		}
+
+		go subscribe(sub, ctx, h.ID())
+		if !config.BootstrapRelay {
+			go publish(ctx, topic)
+		}
 	}
-
-	//Public DHT Discovery
-	go Discover(ctx, h, dht, config.Rendezvous)
-
-	// setup local mDNS discovery
-	if err := setupMDNSDiscovery(h, config.Rendezvous); err != nil {
-		panic(err)
-	}
-
-	// join the pubsub topic
-	topic, err := ps.Join(config.Rendezvous)
-	if err != nil {
-		panic(err)
-	}
-
-	// and subscribe to it
-	sub, err := topic.Subscribe()
-	if err != nil {
-		panic(err)
-	}
-
-	go subscribe(sub, ctx, h.ID())
-	publish(ctx, topic)
-
+	select {} //hang forever to allow publish to run and program to background
 }
 
 // start subsriber to topic
@@ -163,7 +169,7 @@ type discoveryNotifee struct {
 // support PubSub.
 func (n *discoveryNotifee) HandlePeerFound(pi peer.AddrInfo) {
 	if n.h.ID() != pi.ID {
-		fmt.Printf("discovered new peer %s\n", pi.ID.Pretty())
+		fmt.Printf("discovered new mdns peer: %s\n", pi.ID.Pretty())
 		err := n.h.Connect(context.Background(), pi)
 		if err != nil {
 			fmt.Printf("error connecting to peer %s: %s\n", pi.ID.Pretty(), err)

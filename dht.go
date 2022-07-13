@@ -18,7 +18,7 @@ func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multia
 	// if no bootstrap peers give this peer act as a bootstraping node
 	// other peers can use this peers ipfs address for peer discovery via dht.
 	if len(bootstrapPeers) == 0 {
-		options = append(options, dht.Mode(dht.ModeServer))
+		options = append(options, dht.Mode(dht.ModeAuto))
 	}
 
 	//
@@ -34,7 +34,7 @@ func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multia
 	var wg sync.WaitGroup
 	for _, peerAddr := range bootstrapPeers {
 		peerinfo, _ := peer.AddrInfoFromP2pAddr(peerAddr)
-		fmt.Printf("discovered new DHT peer %s\n", peerAddr)
+		fmt.Printf("discovered new DHT peer: %s\n", peerAddr)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
