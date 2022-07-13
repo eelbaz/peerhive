@@ -62,39 +62,38 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if !config.BootstrapRelay {
 
-		// create a new PubSub service using the GossipSub router
-		ps, err := pubsub.NewGossipSub(ctx, h)
-		if err != nil {
-			panic(err)
-		}
-
-		//Public DHT Discovery
-		go Discover(ctx, h, dht, config.Rendezvous)
-
-		// setup local mDNS discovery
-		if err := setupMDNSDiscovery(h, config.Rendezvous); err != nil {
-			panic(err)
-		}
-
-		// join the pubsub topic
-		topic, err := ps.Join(config.Rendezvous)
-		if err != nil {
-			panic(err)
-		}
-
-		// and subscribe to it
-		sub, err := topic.Subscribe()
-		if err != nil {
-			panic(err)
-		}
-
-		go subscribe(sub, ctx, h.ID())
-		if !config.BootstrapRelay {
-			go publish(ctx, topic)
-		}
+	// create a new PubSub service using the GossipSub router
+	ps, err := pubsub.NewGossipSub(ctx, h)
+	if err != nil {
+		panic(err)
 	}
+
+	//Public DHT Discovery
+	go Discover(ctx, h, dht, config.Rendezvous)
+
+	// setup local mDNS discovery
+	if err := setupMDNSDiscovery(h, config.Rendezvous); err != nil {
+		panic(err)
+	}
+
+	// join the pubsub topic
+	topic, err := ps.Join(config.Rendezvous)
+	if err != nil {
+		panic(err)
+	}
+
+	// and subscribe to it
+	sub, err := topic.Subscribe()
+	if err != nil {
+		panic(err)
+	}
+
+	go subscribe(sub, ctx, h.ID())
+	if !config.BootstrapRelay {
+		go publish(ctx, topic)
+	}
+
 	select {} //hang forever to allow publish to run and program to background
 }
 
