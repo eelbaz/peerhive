@@ -29,12 +29,12 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 	}
 
 	//
-	kdht, err := dht.New(ctx, host, options...)
+	dht, err := dht.New(ctx, host, options...)
 	if err != nil {
 		return nil, err
 	}
 
-	if err = kdht.Bootstrap(ctx); err != nil {
+	if err = dht.Bootstrap(ctx); err != nil {
 		return nil, err
 	}
 
@@ -53,9 +53,5 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 	}
 	wg.Wait()
 
-	return kdht, nil
+	return dht, nil
 }
-
-/**
-
-**/
