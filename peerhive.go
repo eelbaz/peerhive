@@ -91,16 +91,16 @@ func main() {
 		panic(err)
 	}
 
-	go subscribe(sub, ctx, h.ID(), config.BootstrapRelay)
+	go subscribe(sub, ctx, h.ID())
 	if !config.BootstrapRelay {
-		go publish(ctx, topic)
+		go publish(ctx, topic, config.BootstrapRelay)
 	}
 
 	select {} //hang forever to allow publish to run and program to background
 }
 
 // start subsriber to topic
-func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer.ID, bootstrapRelay bool) {
+func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer.ID) {
 	for {
 		msg, err := subscriber.Next(ctx)
 		if err != nil {
@@ -111,14 +111,16 @@ func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer
 		if msg.ReceivedFrom == hostID {
 			continue
 		}
-		if !bootstrapRelay {
-			fmt.Printf("%s -> %s\n", msg.ReceivedFrom.Pretty(), string(msg.Data))
-		}
+		fmt.Printf("%s -> %s\n", msg.ReceivedFrom.Pretty(), string(msg.Data))
 	}
 }
 
 // start publisher to topic
-func publish(ctx context.Context, topic *pubsub.Topic) {
+func publish(ctx context.Context, topic *pubsub.Topic, bootsrapRelay bool) {
+	//w dont want a bootstrap publish to send messages, just relay them
+	if bootsrapRelay {
+		return
+	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 
