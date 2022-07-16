@@ -13,6 +13,8 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p/p2p/discovery/mdns"
 
+	p2p "peerhive/p2p"
+
 	pubsub "github.com/libp2p/go-libp2p-pubsub"
 	"github.com/multiformats/go-multiaddr"
 )
@@ -44,7 +46,7 @@ func main() {
 	defer cancel()
 
 	//2: Create new libp2p Host with host options from command line
-	h, err := NewHost(ctx, config.Seed, config.Port)
+	h, err := p2p.NewHost(ctx, config.Seed, config.Port)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +60,7 @@ func main() {
 	fmt.Printf("\n")
 
 	//3: create DHT
-	dht, err := kDHT(ctx, h, config.DiscoveryPeers)
+	dht, err := p2p.DHT(ctx, h, config.DiscoveryPeers)
 	if err != nil {
 		panic(err)
 	}
@@ -70,7 +72,7 @@ func main() {
 	}
 
 	//Public DHT Discovery
-	go Discover(ctx, h, dht, config.Rendezvous)
+	go p2p.Discover(ctx, h, dht, config.Rendezvous)
 
 	// setup local mDNS discovery
 	if err := setupMDNSDiscovery(h, config.Rendezvous); err != nil {

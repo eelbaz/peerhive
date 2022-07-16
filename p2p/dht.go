@@ -1,4 +1,4 @@
-package main
+package p2p
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
-func kDHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
+func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
 	var options []dht.Option
 
 	// if no bootstrap node are available make this node act as a bootstraping node
