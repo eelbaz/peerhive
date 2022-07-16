@@ -26,7 +26,7 @@ func NewNode(ctx context.Context, seed int64, port int) (host.Host, error) {
 		r = mrand.New(mrand.NewSource(seed))
 	}
 
-	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.ECDSA, 2048, r)
+	priv, _, err := crypto.GenerateKeyPairWithReader(crypto.Ed25519, 2048, r)
 	if err != nil {
 		return nil, err
 	}
