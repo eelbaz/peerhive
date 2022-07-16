@@ -46,7 +46,7 @@ func main() {
 	defer cancel()
 
 	//2: Create new libp2p Host with host options from command line
-	h, err := p2p.NewHost(ctx, config.Seed, config.Port)
+	h, err := p2p.NewNode(ctx, config.Seed, config.Port)
 	if err != nil {
 		log.Fatal(err)
 	}

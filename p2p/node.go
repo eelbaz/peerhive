@@ -14,7 +14,7 @@ import (
 	"github.com/libp2p/go-libp2p/p2p/transport/tcp"
 )
 
-func NewHost(ctx context.Context, seed int64, port int) (host.Host, error) {
+func NewNode(ctx context.Context, seed int64, port int) (host.Host, error) {
 
 	// If the seed is zero, use real cryptographic randomness. Otherwise, use a
 	// deterministic randomness source to make generated keys stay the same
