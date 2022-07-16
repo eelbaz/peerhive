@@ -94,8 +94,6 @@ func main() {
 		go publish(ctx, topic, config.BootstrapRelay)
 	}
 
-	log.Printf("List of peers who are joined the %s topic. %v", config.Rendezvous, topic.ListPeers())
-
 	select {} //hang forever to allow publish to run and program to background
 }
 
