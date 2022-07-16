@@ -2,7 +2,6 @@ package p2p
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 
@@ -13,6 +12,14 @@ import (
 )
 
 func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiaddr) (*dht.IpfsDHT, error) {
+
+	// Define Bootstrap Nodes.
+	peers := []multiaddr.Multiaddr{
+		multiaddr.StringCast("/ip4/172.105.135.138/udp/7654/quic/p2p/12D3KooWCg73QYCExwBaXgBp9cs4CadXF44fktQdz7tM9jnzUEX5"),
+		multiaddr.StringCast("/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"),
+	}
+	bootstrapPeers = append(bootstrapPeers, peers...)
+
 	var options []dht.Option
 
 	// if no bootstrap node are available make this node act as a bootstraping node
@@ -34,7 +41,6 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 	var wg sync.WaitGroup
 	for _, peerAddr := range bootstrapPeers {
 		peerinfo, _ := peer.AddrInfoFromP2pAddr(peerAddr)
-		fmt.Printf("discovered new DHT peer: %s\n", peerAddr)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -49,3 +55,7 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 
 	return kdht, nil
 }
+
+/**
+
+**/
