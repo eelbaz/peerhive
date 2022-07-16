@@ -50,8 +50,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// view host details and addresses
-	fmt.Printf("Node shortID:%s \n", shortID(h.ID()))
 
 	fmt.Printf("Node assigned addresses:\n")
 	for i, addr := range h.Addrs() {
@@ -96,6 +94,8 @@ func main() {
 		go publish(ctx, topic, config.BootstrapRelay)
 	}
 
+	log.Printf("List of peers who are joined the %s topic. %v", config.Rendezvous, topic.ListPeers())
+
 	select {} //hang forever to allow publish to run and program to background
 }
 
@@ -117,7 +117,7 @@ func subscribe(subscriber *pubsub.Subscription, ctx context.Context, hostID peer
 
 // start publisher to topic
 func publish(ctx context.Context, topic *pubsub.Topic, bootsrapRelay bool) {
-	//w dont want a bootstrap publish to send messages, just relay them
+	//we dont want a bootstrap publish to send messages, just relay them
 	if bootsrapRelay {
 		return
 	}
@@ -157,11 +157,11 @@ func (al *addrList) Set(value string) error {
 	return nil
 }
 
-// shortID returns the last 8 chars of a base58-encoded peer id.
+/** shortID returns the last 8 chars of a base58-encoded peer id.
 func shortID(p peer.ID) string {
 	pretty := p.Pretty()
 	return pretty[len(pretty)-8:]
-}
+}**/
 
 // discoveryNotifee gets notified when we find a new peer via mDNS discovery
 type discoveryNotifee struct {

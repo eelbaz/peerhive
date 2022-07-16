@@ -15,6 +15,7 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 
 	// Define Bootstrap Nodes.
 	peers := []multiaddr.Multiaddr{
+		multiaddr.StringCast("/ip4/172.105.135.138/udp/7654/quic/p2p/QmXwFNChSPjF1KB4RcrimiPf1gADKYBLyP8yKubUsMtz9t"),
 		multiaddr.StringCast("/ip4/172.105.135.138/tcp/7654/p2p/QmXwFNChSPjF1KB4RcrimiPf1gADKYBLyP8yKubUsMtz9t"),
 		multiaddr.StringCast("/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"),
 	}
@@ -24,9 +25,7 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 
 	// if no bootstrap node are available make this node act as a bootstraping node
 	// so other peers can may this node's ipfs address for peer discovery via dht.
-	if len(bootstrapPeers) == 0 {
-		options = append(options, dht.Mode(dht.ModeAuto))
-	}
+	options = append(options, dht.Mode(dht.ModeAuto))
 
 	//
 	dht, err := dht.New(ctx, host, options...)
