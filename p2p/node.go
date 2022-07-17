@@ -7,7 +7,7 @@ import (
 	"io"
 	mrand "math/rand"
 
-	libp2p "github.com/libp2p/go-libp2p"
+	"github.com/libp2p/go-libp2p"
 	"github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
 	libp2pquic "github.com/libp2p/go-libp2p/p2p/transport/quic"
