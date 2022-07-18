@@ -1,28 +1,54 @@
 package main
 
 import (
+	"bufio"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"fmt"
 	"log"
 
-	ic "github.com/libp2p/go-libp2p-core/crypto"
-	tpt "github.com/libp2p/go-libp2p-core/transport"
-	quic "github.com/libp2p/go-libp2p-quic-transport"
+	"github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/peer"
+	tp "github.com/libp2p/go-libp2p-core/transport"
+	quic "github.com/libp2p/go-libp2p/p2p/transport/quic"
+	"github.com/multiformats/go-multiaddr"
 )
 
-func quicknode() {
-
-}
-
-func getTransport() tpt.Transport {
-	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+func quicknode(ctx context.Context, raddr multiaddr.Multiaddr, p peer.ID) {
+	fmt.Println("in quicknode")
+	tp := getTransport()
+	conn, err := tp.Dial(ctx, raddr, p)
+	conn.AcceptStream()
 	if err != nil {
 		log.Println(err)
-		return (nil)
+	}
+	ms, _ := conn.OpenStream(ctx)
+	defer ms.Close()
+	reader := bufio.NewReader(ms)
+	rw := bufio.NewReadWriter(bufio.NewReader(reader), bufio.NewWriter(ms))
+	fmt.Fprintf(rw, "Hello World")
+
+	for {
+		rw.Write([]byte("hello" + "Hello:" + p.String() + ":" + raddr.String() + "\n"))
+		fmt.Printf(reader.ReadString('\n'))
+	}
+}
+
+func getTransport() tp.Transport {
+	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Println("error in getTransport generateRSAKey: ", err)
 	}
 
-	key, err := ic.UnmarshalRsaPrivateKey(x509.MarshalPKCS1PrivateKey(rsaKey))
+	key, err := crypto.UnmarshalRsaPrivateKey(x509.MarshalPKCS1PrivateKey(rsaKey))
+	if err != nil {
+		log.Println(err)
+	}
 	tr, err := quic.NewTransport(key, nil, nil, nil)
+	if err != nil {
+		log.Println(err)
+	}
 	return tr
 }

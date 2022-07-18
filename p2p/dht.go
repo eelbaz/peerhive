@@ -17,7 +17,7 @@ func DHT(ctx context.Context, host host.Host, bootstrapPeers []multiaddr.Multiad
 	peers := []multiaddr.Multiaddr{
 		multiaddr.StringCast("/ip4/172.105.135.138/udp/7654/quic/p2p/12D3KooWCg73QYCExwBaXgBp9cs4CadXF44fktQdz7tM9jnzUEX5"),
 		multiaddr.StringCast("/ip4/172.105.135.138/tcp/7654/p2p/12D3KooWCg73QYCExwBaXgBp9cs4CadXF44fktQdz7tM9jnzUEX5"),
-		multiaddr.StringCast("/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"),
+		//multiaddr.StringCast("/ip4/104.131.131.82/udp/4001/quic/p2p/QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ"),
 	}
 	bootstrapPeers = append(bootstrapPeers, peers...)
 

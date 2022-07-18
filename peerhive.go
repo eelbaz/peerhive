@@ -94,6 +94,11 @@ func main() {
 		go publish(ctx, topic, config.BootstrapRelay)
 	}
 
+	pid, _ := peer.IDFromString("CovLVG4fQcqQEUKRZeHRNSJ1Qj1M6gZa8D4KQyXNdfZeMgr8j9YcAEnPthsqAUH33wRk2jN")
+	qnma, _ := multiaddr.NewMultiaddr("/ip4/172.105.135.138/udp/7654/quic/p2p/12D3KooWCg73QYCExwBaXgBp9cs4CadXF44fktQdz7tM9jnzUEX5")
+
+	quicknode(ctx, qnma, pid)
+
 	select {} //hang forever to allow publish to run and program to background
 }
 
