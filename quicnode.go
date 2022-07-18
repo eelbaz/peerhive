@@ -20,19 +20,19 @@ func quicknode(ctx context.Context, raddr multiaddr.Multiaddr, p peer.ID) {
 	fmt.Println("in quicknode")
 	tp := getTransport()
 	conn, err := tp.Dial(ctx, raddr, p)
-	conn.AcceptStream()
 	if err != nil {
 		log.Println(err)
 	}
 	ms, _ := conn.OpenStream(ctx)
 	defer ms.Close()
-	reader := bufio.NewReader(ms)
-	rw := bufio.NewReadWriter(bufio.NewReader(reader), bufio.NewWriter(ms))
+	as, _ := conn.AcceptStream()
+	defer as.Close()
+	rw := bufio.NewReadWriter(bufio.NewReader(as), bufio.NewWriter(ms))
 	fmt.Fprintf(rw, "Hello World")
 
 	for {
 		rw.Write([]byte("hello" + "Hello:" + p.String() + ":" + raddr.String() + "\n"))
-		fmt.Printf(reader.ReadString('\n'))
+		fmt.Printf(rw.ReadString('\n'))
 	}
 }
 
