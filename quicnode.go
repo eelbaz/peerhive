@@ -32,7 +32,7 @@ func quicknode(ctx context.Context, raddr multiaddr.Multiaddr, p peer.ID) {
 
 	for {
 		rw.Write([]byte("hello" + "Hello:" + p.String() + ":" + raddr.String() + "\n"))
-		fmt.Printf(rw.ReadString('\n'))
+		rw.Flush()
 	}
 }
 
