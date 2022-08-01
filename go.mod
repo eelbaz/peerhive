@@ -15,25 +15,7 @@ require (
 	github.com/libp2p/go-libp2p-discovery v0.6.0 // indirect
 	github.com/libp2p/go-libp2p-kbucket v0.4.7 // indirect
 	github.com/libp2p/go-libp2p-record v0.1.3 // indirect
-	github.com/libp2p/go-mplex v0.7.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/pion/datachannel v1.4.21 // indirect
-	github.com/pion/dtls/v2 v2.0.8 // indirect
-	github.com/pion/ice/v2 v2.0.16 // indirect
-	github.com/pion/interceptor v0.0.11 // indirect
-	github.com/pion/logging v0.2.2 // indirect
-	github.com/pion/mdns v0.0.5 // indirect
-	github.com/pion/randutil v0.1.0 // indirect
-	github.com/pion/rtcp v1.2.6 // indirect
-	github.com/pion/rtp v1.6.2 // indirect
-	github.com/pion/sctp v1.7.11 // indirect
-	github.com/pion/sdp/v3 v3.0.4 // indirect
-	github.com/pion/srtp/v2 v2.0.2 // indirect
-	github.com/pion/stun v0.3.5 // indirect
-	github.com/pion/transport v0.12.3 // indirect
-	github.com/pion/turn/v2 v2.0.5 // indirect
-	github.com/pion/udp v0.1.0 // indirect
-	github.com/pion/webrtc/v3 v3.0.16
 	github.com/polydawn/refmt v0.0.0-20201211092308-30ac6d18308e // indirect
 	github.com/whyrusleeping/go-keyspace v0.0.0-20160322163242-5b898ac5add1 // indirect
 	github.com/whyrusleeping/timecache v0.0.0-20160911033111-cfcb2f1abfee // indirect
@@ -80,11 +62,9 @@ require (
 	github.com/libp2p/go-libp2p-asn-util v0.2.0 // indirect
 	github.com/libp2p/go-libp2p-core v0.16.1
 	github.com/libp2p/go-libp2p-kad-dht v0.16.0
-	github.com/libp2p/go-libp2p-mplex v0.8.0
 	github.com/libp2p/go-libp2p-peerstore v0.6.0 // indirect
 	github.com/libp2p/go-libp2p-pubsub v0.7.1
 	github.com/libp2p/go-libp2p-resource-manager v0.3.0 // indirect
-	github.com/libp2p/go-libp2p-webrtc-direct v0.0.0-20220406105718-41a3151f0a37
 	github.com/libp2p/go-msgio v0.2.0 // indirect
 	github.com/libp2p/go-nat v0.1.0 // indirect
 	github.com/libp2p/go-netroute v0.2.0 // indirect

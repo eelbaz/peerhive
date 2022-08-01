@@ -8,13 +8,14 @@ import (
 	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/network"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
-	discovery "github.com/libp2p/go-libp2p/p2p/discovery/routing"
+	"github.com/libp2p/go-libp2p/p2p/discovery/routing"
+	discutil "github.com/libp2p/go-libp2p/p2p/discovery/util"
 )
 
 func Discover(ctx context.Context, h host.Host, dht *dht.IpfsDHT, rendezvous string) {
-	var routingDiscovery = discovery.NewRoutingDiscovery(dht)
+	routingDiscovery := routing.NewRoutingDiscovery(dht)
 
-	routingDiscovery.Advertise(ctx, rendezvous)
+	discutil.Advertise(ctx, routingDiscovery, rendezvous)
 
 	ticker := time.NewTicker(time.Second * 1)
 	defer ticker.Stop()
