@@ -5,8 +5,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/libp2p/go-libp2p-core/host"
@@ -89,16 +92,16 @@ func main() {
 		panic(err)
 	}
 
+	// start the publisher and subscriber
 	go subscribe(sub, ctx, h.ID())
 	if !config.BootstrapRelay {
 		go publish(ctx, topic, config.BootstrapRelay)
 	}
 
-	//pid, _ := peer.IDFromString("CovLVG4fQcqQEUKRZeHRNSJ1Qj1M6gZa8D4KQyXNdfZeMgr8j9YcAEnPthsqAUH33wRk2jN")
-	//qnma, _ := multiaddr.NewMultiaddr("/ip4/172.105.135.138/udp/7654/quic/p2p/12D3KooWCg73QYCExwBaXgBp9cs4CadXF44fktQdz7tM9jnzUEX5")
-
-	//quicknode(ctx, qnma, pid)
-
+	go ExecuteFFMpegCmd("12345")                          //execute ffmpeg command
+	r := HandleUDPConnection(FFMpegUDPConnected("12345")) //handle UDP connection
+	fmt.Println("r is: ", r)
+	// wait for ctrl-c
 	select {} //hang forever to allow publish to run and program to background
 }
 
@@ -191,4 +194,49 @@ func setupMDNSDiscovery(h host.Host, ns string) error {
 	// setup mDNS discovery to find local peers
 	s := mdns.NewMdnsService(h, ns, &discoveryNotifee{h: h})
 	return s.Start()
+}
+
+//given a port number, execute ffmpeg command line process to stream video from port
+func ExecuteFFMpegCmd(port string) {
+	cmd := exec.Command(
+		"ffmpeg",             // path to ffmpeg executable
+		"-f", "avfoundation", // input format
+		"-pixel_format", "yuv420p", // pixel format
+		"-framerate", "29.97", // frame rate
+		"-video_size", "960x540", // video size
+		"-i", "1:0", // input device
+		"-c:v", "h264", // video codec
+		"-c:a", "aac", // audio filter
+		"-preset", "ultrafast", // preset
+		"-crf", "29.97", // constant rate factor
+		"-f", "mpegts", // output format
+		"udp://localhost:"+port, // output URL
+	)
+	fmt.Println(cmd.Args)
+	//cmd.Stdout = os.Stdout   // redirect stdout to terminal
+	//cmd.Stderr = os.Stderr   // redirect stderr to terminal
+	cmd.Run()                // run the command
+	defer cmd.Process.Kill() // kill the command
+}
+
+func HandleUDPConnection(udpReader io.Reader) io.Reader {
+	buf := make([]byte, 1500)
+	go func() {
+		for {
+			n, err := udpReader.Read(buf)
+			if err != nil {
+				fmt.Println(err)
+			}
+			buf = buf[:n]
+			fmt.Println(buf)
+		}
+	}()
+	return udpReader
+}
+
+//Given a port number return a UDP connection to the port to receive data from
+func FFMpegUDPConnected(port string) *net.UDPConn {
+	addr, _ := net.ResolveUDPAddr("udp", ":"+port)
+	conn, _ := net.ListenUDP("udp", addr)
+	return conn
 }

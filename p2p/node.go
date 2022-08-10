@@ -33,7 +33,6 @@ func NewNode(ctx context.Context, seed int64, port int) (host.Host, error) {
 
 	ip6quic := fmt.Sprintf("/ip6/::/udp/%d/quic", port)
 	ip4quic := fmt.Sprintf("/ip4/0.0.0.0/udp/%d/quic", port)
-
 	ip6tcp := fmt.Sprintf("/ip6/::/tcp/%d", port)
 	ip4tcp := fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port)
 
